@@ -1,6 +1,5 @@
 <?php 
     namespace App\Payment\Gateways;
-    use DateTime;
 
     class Mpesa{
         // MPESA Constants
@@ -24,6 +23,7 @@
             '17' => 'Internal Failure',
             '20' => 'Unresolved Initiator',
             '26' => 'Traffic blocking condition in place',
+            '1032' => 'Request cancelled by user'
         ];
     
         // MPESA HTTP Errors
@@ -95,34 +95,60 @@
         protected function generate_access_token(){
             $curl = curl_init();
 
+            // set the URL
+            curl_setopt($curl, CURLOPT_URL, $this->authorization_url);
+            
+            // enable headers
+            curl_setopt($curl, CURLOPT_HEADER, true);
+
+            // set the headers
             curl_setopt($curl, CURLOPT_HTTPHEADER, [
                 'Authorization: Basic ' . base64_encode($this->consumer_key . ':' . $this->consumer_secret),
             ]);
             
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+            // return value instead of echoing out to screen
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             
+            // execute the curl request
             $response = curl_exec($curl);
             
-            return json_decode($response);
+            // close the curl request
+            curl_close($curl);
+
+            // split header and body
+            list($header, $body) = explode("\r\n\r\n", $response, 2);
+
+            // decode the body
+            $body = json_decode($body);
+
+            // Throw exception if body is empty
+            if(is_null($body)){
+                throw new \Exception("MPESA Error. Please Contact Admin");
+            }
+            
+            // return the access token
+            return $body->access_token;
         }
 
         /**
          * Performs STK push on customers Phone
          * 
          * Param 1. phone - Phone number to receive STK Push
-         * Param 2. amount - The amount to request
+         * Param 2. amount - The amount to request (only whole numbers)
          * Param 3. callback_url - The URL to be pinged once the transaction is complete
          * Param 4. account_reference - The account reference (between 1 and 12 characters)
          * Param 5. transaction_description - Description that wil be sent to the customer (between 1 and 13 characters)
          */
-        public function request_stk_push($phone, $amount, $passkey, $callback_url, $account_reference, $transaction_description){
+        public function request_stk_push($phone, $amount, $callback_url, $account_reference, $transaction_description){
             // Generate the access token
             $access_token = $this->generate_access_token();
 
-            echo $access_token;
-
-            // Generate password accoding to Daraja Specifications (base64.encode(Shortcode+Passkey+Timestamp))
+            // Generate password according to Daraja Specifications (base64.encode(Shortcode+Passkey+Timestamp))
             $password = base64_encode($this->shortcode . $this->passkey . $this->generate_timestamp());
+            
+            return "";
         }
 
 
@@ -134,7 +160,7 @@
          * RETURN formatted timestamp as string
          */
         protected function generate_timestamp(){
-            return (new DateTime())->format("YmdHis");
+            return (new \DateTime())->format("YmdHis");
         }
 
         /**

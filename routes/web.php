@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MpesaController;
+
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [MpesaController::class, 'index'])->name('home');
+Route::post('/', [MpesaController::class, 'request_stk_push']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
