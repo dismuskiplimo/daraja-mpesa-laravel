@@ -6,59 +6,75 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use Illuminate\View\View;
-
-use App\Payment\Gateways\Mpesa;
+use App\Models\Donation;
 
 class MpesaController extends Controller
 {
     /**
-     * Index Function
+     * Index Page to get donor details
      */
     public function index(Request $request, Response $response): View{
         return view("pages.index", []);
     }
 
 
+    /**
+     * Initiate STK Push
+     */
     public function request_stk_push(Request $request, Response $response){
-        $error = false;
-        
         // validate parameters
         $request->validate([
+            "donor_name"=> "string|required",
             "phone"=> "numeric|required",
             "amount"=> "numeric|required|min:1",
+            "donation_type"=> "string|required",
+            "donor_note"=> "string|required",
         ]);
         
-        $mpesa = new Mpesa(
-            env("MPESA_SHORTCODE"), 
-            env("MPESA_CONSUMER_KEY"), 
-            env("MPESA_CONSUMER_SECRET"),
-            env("MPESA_PASSKEY"),
-            env("MPESA_TRANSACTION_TYPE"),
-            env("MPESA_ENVIRONMENT")
-        );
+        $mpesa = 
 
         $callback_url = route("mpesa_callback");
         $account_reference = "donation";
         $transaction_description = "Donation ACC";
 
-        // attempt stk push
+        // attempt STK push
         try{
-            $result = $mpesa->request_stk_push($request->phone, $request->amount, $callback_url, $account_reference, $transaction_description);
+            $result = $this->mpesa->request_stk_push($request->phone, $request->amount, $callback_url, $account_reference, $transaction_description);
             
             // get the MerchantRequestID and CheckoutRequestID
+            $merchant_request_id = $result->MerchantRequestID;
+            $checkout_request_id = $result->CheckOutRequestID;
 
-            session()->flash('success', "Success");
+            // save the transaction to database
+            $donation = new Donation();
+
+            $donation->donor_name = $request->donor_name;
+            $donation->phone = $this->mpesa::format_phone_number($request->phone);
+            $donation->donation_type = $request->donation_type;
+            $donation->amount = ceil($request->amount);
+            $donation->donor_note = $request->donor_note;
+            $donation->merchant_request_id = $merchant_request_id;
+            $donation->checkout_request_id = $checkout_request_id;
+
+            // Save to daabase
+            $donation->save();
+
+            // Save flash message to session
+            session()->flash('success', "STK Push sent to phone. Please Input MPESA PIN and click OK");
+            return view("pages.mpesa-response", []);
         }
 
         // Error occurred while submitting STK push
         catch(\Exception $e){
-            echo $e->getMessage();
-            session()->flash('error', "Error: " . $e->getMessage());
-            
-            //return redirect()->back()->withInput(request()->all());
-        }
-        
+            session()->flash('error', $e->getMessage());
+            return redirect()->back()->withInput(request()->all());
+        } 
+    }
 
-        // return view("pages.mpesa-response", []);
+    /**
+     * Handle MPESA callback
+     */
+    public function mpesa_callback(Request $request, Response $response){
+
     }
 }

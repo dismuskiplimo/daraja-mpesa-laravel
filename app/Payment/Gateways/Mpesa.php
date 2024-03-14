@@ -163,7 +163,7 @@
             $password = $this->generate_password($timestamp);
 
             // format phone number
-            $phone = $this->format_phone_number($phone);
+            $phone = $this::format_phone_number($phone);
 
             // initialize the curl request
             $curl = curl_init();
@@ -189,7 +189,7 @@
                 'Password' 			    => $password,
                 'Timestamp' 			=> $timestamp,
                 'TransactionType' 	    => $this->transaction_type,
-                'Amount' 				=> $amount,
+                'Amount' 				=> ceil($amount),
                 'PartyA' 				=> $phone,
                 'PartyB' 				=> $this->shortcode,
                 'PhoneNumber' 		    => $phone,
@@ -348,7 +348,7 @@
          * 
          * Returns: Formatted phone number
          */
-        protected function format_phone_number($phone){
+        public static function format_phone_number($phone){
             if (preg_match('/^0\d{9}$/', $phone)){
                 return '254' . substr($phone, 1);
             }
