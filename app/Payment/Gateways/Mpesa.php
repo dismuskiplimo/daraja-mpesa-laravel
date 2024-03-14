@@ -23,7 +23,13 @@
             '17' => 'Internal Failure',
             '20' => 'Unresolved Initiator',
             '26' => 'Traffic blocking condition in place',
-            '1032' => 'Request cancelled by user'
+            '1032' => 'Request cancelled by user',
+            '1037' => 'STK error. User Cannot be reached. Please ensure that the phone is offline and that the SIM card MPESA Menu is updated. To update SIM, dial *234*1*6#',
+            '1025' => 'An error occurred while sending the STK push request',
+            '9999' => 'An error occurred while sending the STK push request. MPESA Message Too long',
+            '2001' => 'Invalid MPESA PIN. Please Try Again',
+            '1019' => 'Transaction Expired. Please Try Again',
+            '1001' => 'Transaction Not Completed. A Similar Transaction is Underway',
         ];
     
         // MPESA HTTP Errors
@@ -43,13 +49,13 @@
         // MPESA URLs
         // LIVE
         protected const SANDBOX_AUTHORIZATION_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        protected const SANDBOX_REQUEST_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        protected const SANDBOX_QUERY_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+        protected const SANDBOX_REQUEST_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+        protected const SANDBOX_QUERY_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query";
 
         // SANDBOX
         protected const LIVE_AUTHORIZATION_URL = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        protected const LIVE_REQUEST_URL = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        protected const LIVE_QUERY_URL = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+        protected const LIVE_REQUEST_URL = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+        protected const LIVE_QUERY_URL = "https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query";
         
         // MPESA Credentials
         protected $shortcode;
@@ -140,15 +146,175 @@
          * Param 3. callback_url - The URL to be pinged once the transaction is complete
          * Param 4. account_reference - The account reference (between 1 and 12 characters)
          * Param 5. transaction_description - Description that wil be sent to the customer (between 1 and 13 characters)
+         * 
+         * Return: An object containing MerchantRequestID and CheckoutRequestID if successful
+         * 
+         * Throws: Exception if error occurs
          */
         public function request_stk_push($phone, $amount, $callback_url, $account_reference, $transaction_description){
+            
             // Generate the access token
             $access_token = $this->generate_access_token();
 
-            // Generate password according to Daraja Specifications (base64.encode(Shortcode+Passkey+Timestamp))
-            $password = base64_encode($this->shortcode . $this->passkey . $this->generate_timestamp());
+            // generate the timestamp
+            $timestamp = $this->generate_timestamp();
+
+            // Generate password according to Daraja Specifications
+            $password = $this->generate_password($timestamp);
+
+            // format phone number
+            $phone = $this->format_phone_number($phone);
+
+            // initialize the curl request
+            $curl = curl_init();
+
+            // set the URL
+            curl_setopt($curl, CURLOPT_URL, $this->request_url);
+
+            // Enable the header
+            curl_setopt($curl, CURLOPT_HEADER, true);
             
-            return "";
+            // Set the headers
+            curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $access_token,
+            ]);
+
+            // Enable POST
+            curl_setopt($curl, CURLOPT_POST, true);
+            
+            // JSON encode the post data
+            $post_data = json_encode([
+                'BusinessShortCode' 	=> $this->shortcode,
+                'Password' 			    => $password,
+                'Timestamp' 			=> $timestamp,
+                'TransactionType' 	    => $this->transaction_type,
+                'Amount' 				=> $amount,
+                'PartyA' 				=> $phone,
+                'PartyB' 				=> $this->shortcode,
+                'PhoneNumber' 		    => $phone,
+                'CallBackURL' 		    => $callback_url,
+                'AccountReference' 	    => $account_reference,
+                'TransactionDesc' 	    => $transaction_description, 
+            ]);
+
+            // SET the POST fields
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
+
+            // SSL
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+            // Enable return transfer to prevent response from being echo'ed
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+            // Execute the CURL Request
+            $response = curl_exec($curl);
+
+            // close the curl request
+            curl_close($curl);
+
+            // split header and body
+            list($header, $body) = explode("\r\n\r\n", $response, 2);
+
+            // decode the body
+            $body =  json_decode($body);
+
+            // check if transaction was successfull
+            if(is_null($body)){
+                // Error occurred while making push
+                throw new \Exception("Internal Server Error. Please Contact Admin");
+            }
+
+            else if(isset($body->errorCode)){
+                // error occured while making push
+                throw new \Exception($body->errorMessage);
+            }
+
+            else if($body->ResponseCode !== "0"){
+                // error occurred while making push
+                throw new \Exception($body->ResponseDescription);
+            }
+
+            // Return the body as JSON
+            return $body;
+        }
+
+        /**
+         * Queries the status of STK push
+         * 
+         * Param 1: checkout_request_id - The CheckOut request ID
+         */
+        public function query_stk_push($checkout_request_id){
+            // Generate the access token
+            $access_token = $this->generate_access_token();
+
+            // generate the timestamp
+            $timestamp = $this->generate_timestamp();
+
+            // Generate password according to Daraja Specifications
+            $password = $this->generate_password($timestamp);
+
+            // initialize the curl request
+            $curl = curl_init();
+
+            // set the URL
+            curl_setopt($curl, CURLOPT_URL, $this->request_url);
+
+            // Enable the header
+            curl_setopt($curl, CURLOPT_HEADER, true);
+            
+            // Set the headers
+            curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $access_token,
+            ]);
+
+            // Enable POST
+            curl_setopt($curl, CURLOPT_POST, true);
+            
+            // JSON encode the post data
+            $post_data = json_encode([
+                'BusinessShortCode' 	=> $this->shortcode,
+                'Password' 			    => $password,
+                'Timestamp' 			=> $timestamp,
+                'CheckoutRequestID'     => $checkout_request_id,
+            ]);
+
+            // SET the POST fields
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
+
+            // SSL
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+
+            // Enable return transfer to prevent response from being echo'ed
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+            // Execute the CURL Request
+            $response = curl_exec($curl);
+
+            // close the curl request
+            curl_close($curl);
+
+            // split header and body
+            list($header, $body) = explode("\r\n\r\n", $response, 2);
+
+            // decode the body
+            $body =  json_decode($body);
+
+            if(is_null($body)){
+                // Error occurred while making push
+                throw new \Exception("Internal Server Error. Please Contact Admin");
+            }
+
+            else if(isset($body->errorCode)){
+                // error occured while making push
+                throw new \Exception($body->errorMessage);
+            }
+
+            else if($body->ResponseCode !== "0"){
+                // error occurred while making push
+                throw new \Exception($body->ResponseDescription);
+            }
         }
 
 
@@ -161,6 +327,33 @@
          */
         protected function generate_timestamp(){
             return (new \DateTime())->format("YmdHis");
+        }
+
+        /**
+         * Generate password according to Daraja Specifications
+         * (base64.encode(Shortcode+Passkey+Timestamp))
+         * 
+         * Param 1: timestamp - The timestamp in the format YYYYMMDDHHmmss
+         */
+        protected function generate_password($timestamp){
+            return base64_encode($this->shortcode . $this->passkey . $timestamp);
+        }
+
+        /**
+         * Formats phone number to the required format 254xxxxxxxxx
+         * 
+         * Param 1: phone - The phone number to be fromatted (must be in the format 07xxxxxxxx)
+         * 
+         * Throws: Exeption if phone number is invalid
+         * 
+         * Returns: Formatted phone number
+         */
+        protected function format_phone_number($phone){
+            if (preg_match('/^0\d{9}$/', $phone)){
+                return '254' . substr($phone, 1);
+            }
+
+            throw new \Exception('Invalid Phone Number');
         }
 
         /**

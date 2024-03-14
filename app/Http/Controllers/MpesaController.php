@@ -20,6 +20,8 @@ class MpesaController extends Controller
 
 
     public function request_stk_push(Request $request, Response $response){
+        $error = false;
+        
         // validate parameters
         $request->validate([
             "phone"=> "numeric|required",
@@ -35,13 +37,16 @@ class MpesaController extends Controller
             env("MPESA_ENVIRONMENT")
         );
 
-        $callback_url = "";
-        $account_reference = "";
-        $transaction_description = "";
+        $callback_url = route("mpesa_callback");
+        $account_reference = "donation";
+        $transaction_description = "Donation ACC";
 
         // attempt stk push
         try{
             $result = $mpesa->request_stk_push($request->phone, $request->amount, $callback_url, $account_reference, $transaction_description);
+            
+            // get the MerchantRequestID and CheckoutRequestID
+
             session()->flash('success', "Success");
         }
 
@@ -49,6 +54,7 @@ class MpesaController extends Controller
         catch(\Exception $e){
             echo $e->getMessage();
             session()->flash('error', "Error: " . $e->getMessage());
+            
             //return redirect()->back()->withInput(request()->all());
         }
         
