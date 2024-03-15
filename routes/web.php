@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [MpesaController::class, 'index'])->name('home');
 Route::post('/', [MpesaController::class, 'request_stk_push']);
-Route::post('/mpesa/callback', [MpesaController::class, 'mpesa_callback'])->name("mpesa_callback");
+Route::post('/payments/mpesa/callback', [MpesaController::class, 'mpesa_callback'])->name("mpesa_callback");
 
 Route::get('/dashboard', function () {
     return view('dashboard');

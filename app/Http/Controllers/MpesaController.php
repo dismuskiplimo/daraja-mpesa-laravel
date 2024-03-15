@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use Illuminate\View\View;
-use App\Models\Donation;
+use App\Models\{Donation, MpesaCallbackLog};
+
 
 class MpesaController extends Controller
 {
@@ -75,6 +76,23 @@ class MpesaController extends Controller
      * Handle MPESA callback
      */
     public function mpesa_callback(Request $request, Response $response){
+        // Create MPESA Log
+        $log = new MpesaCallbackLog();
+        
+        // attempt to parse the equest
+        try{
+            // parse body
+            $body = $this->mpesa->process_callback($request);
+            
+            // save to log
+            $log->body = json_encode($body);
+        }
+        
+        catch(\Exception $e){
+            $log->body = $e->getMessage();
+        }
 
+        // Save to MpesaCallbackLog
+        $log->save();
     }
 }

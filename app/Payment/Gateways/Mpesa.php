@@ -317,6 +317,35 @@
             }
         }
 
+        /**
+         * Process MPESA Callback
+         * 
+         * Param 1: request - Raw request body received from API after submitting STK request
+         * Throw: Exception if response is invalid or ResultCode != 0
+         * Return: JSON encoded response if successfull
+         */
+
+        public function process_callback($request){
+            // attempt to split the request (header, body)
+            list($header, $body) = explode("\r\n\r\n", $request, 2);
+
+            // decode the body
+            $body = json_decode($body);
+
+            // check if the body is null
+            if(is_null($body)){
+                throw new \Exception("Error Processing Request");
+            }
+
+            // check if resultcode is != 0
+            if($body->Body->stkCallback->ResultCode != "0"){
+                throw new \Exception($body->Body->stkCallback->ResultDesc);
+            }
+
+            // return parsed body
+            return $body;
+        }
+
 
         // UTILITY METHODS
         
