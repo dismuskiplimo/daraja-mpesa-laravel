@@ -6,11 +6,26 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use Illuminate\View\View;
-use App\Models\{Donation, MpesaErrorLog, MpesaCallbackLog, Donor};
+use App\Models\{Donation, MpesaErrorLog, MpesaCallbackLog};
+
+use App\Payment\Gateways\Mpesa;
 
 
 class MpesaController extends Controller
 {
+    protected $mpesa;
+
+    public function __construct(){
+        $this->mpesa = new Mpesa(
+            env("MPESA_SHORTCODE"), 
+            env("MPESA_CONSUMER_KEY"), 
+            env("MPESA_CONSUMER_SECRET"),
+            env("MPESA_PASSKEY"),
+            env("MPESA_TRANSACTION_TYPE"),
+            env("MPESA_ENVIRONMENT")
+        );
+    }
+    
     /**
      * Index Page to get donor details
      */

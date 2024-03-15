@@ -1,13 +1,16 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\MpesaController;
+use App\Http\Controllers\{ProfileController, MpesaController, DonationController};
 
 use Illuminate\Support\Facades\Route;
 
+// MPESA
 Route::get('/', [MpesaController::class, 'index'])->name('home');
 Route::post('/', [MpesaController::class, 'request_stk_push']);
 Route::post('/payments/mpesa/callback', [MpesaController::class, 'mpesa_callback'])->name("mpesa_callback");
+
+// Donations
+Route::get('/donations', [DonationController::class, 'index'])->name('donations');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
