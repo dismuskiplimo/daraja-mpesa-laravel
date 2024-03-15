@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('mpesa_callback_logs', function (Blueprint $table) {
+        Schema::create('mpesa_error_logs', function (Blueprint $table) {
             $table->id();
             $table->text("body");
             $table->timestamps();
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('mpesa_callback_logs');
+        Schema::dropIfExists('mpesa_error_logs');
     }
 };

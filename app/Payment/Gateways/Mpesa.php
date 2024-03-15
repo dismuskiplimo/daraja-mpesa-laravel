@@ -258,7 +258,7 @@
             $curl = curl_init();
 
             // set the URL
-            curl_setopt($curl, CURLOPT_URL, $this->request_url);
+            curl_setopt($curl, CURLOPT_URL, $this->query_url);
 
             // Enable the header
             curl_setopt($curl, CURLOPT_HEADER, true);

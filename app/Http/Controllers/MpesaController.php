@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 use Illuminate\View\View;
-use App\Models\{Donation, MpesaCallbackLog};
+use App\Models\{Donation, MpesaErrorLog, MpesaCallbackLog, Donor};
 
 
 class MpesaController extends Controller
@@ -31,8 +31,6 @@ class MpesaController extends Controller
             "donation_type"=> "string|required",
             "donor_note"=> "string|required",
         ]);
-        
-        $mpesa = 
 
         $callback_url = route("mpesa_callback");
         $account_reference = "donation";
@@ -67,6 +65,11 @@ class MpesaController extends Controller
 
         // Error occurred while submitting STK push
         catch(\Exception $e){
+            // Create MPESA Error Log
+            $log = new MpesaErrorLog();
+            $log->body = $e;
+            $log->save();
+
             session()->flash('error', $e->getMessage());
             return redirect()->back()->withInput();
         } 
@@ -76,23 +79,46 @@ class MpesaController extends Controller
      * Handle MPESA callback
      */
     public function mpesa_callback(Request $request, Response $response){
-        // Create MPESA Log
-        $log = new MpesaCallbackLog();
-        
         // attempt to parse the equest
         try{
             // parse body
             $body = $this->mpesa->process_callback($request);
             
-            // save to log
+            // Create MPESA Log
+            $log = new MpesaCallbackLog();
             $log->body = json_encode($body);
+            $log->save();
+
+            // query the stk response
+            $checkout_request_id = $body->Body->stkCallback->CheckoutRequestID;
+            
+            // ensures that the transaction completed
+            $this->mpesa->query_stk_push($checkout_request_id);
+
+            // transaction details
+            $amount = $body->Body->stkCallback->CallbackMetadata->Item[0]->Value;
+            $mpesa_receipt_number = $body->Body->stkCallback->CallbackMetadata->Item[1]->Value;
+            $transaction_date = $body->Body->stkCallback->CallbackMetadata->Item[2]->Value;
+            $phone = $body->Body->stkCallback->CallbackMetadata->Item[3]->Value;
+
+            // update the donation details
+            $donation = Donation::where("checkout_request_id", $checkout_request_id)->first();
+            $donation->amount = $amount;
+            $donation->mpesa_receipt_number = $mpesa_receipt_number;
+            $donation->transaction_date = $transaction_date;
+            $donation->phone = $phone;
+            $donation->fulfilled = '1';
+            $donation->update();
+
+            // Send Email
+
         }
         
         catch(\Exception $e){
-            $log->body = $e->getMessage();
+            // Create MPESA Error Log
+            $log = new MpesaErrorLog();
+            $log->body = $e;
+            $log->save();
         }
-
-        // Save to MpesaCallbackLog
-        $log->save();
     }
 }
