@@ -43,7 +43,7 @@ class MpesaController extends Controller
             
             // get the MerchantRequestID and CheckoutRequestID
             $merchant_request_id = $result->MerchantRequestID;
-            $checkout_request_id = $result->CheckOutRequestID;
+            $checkout_request_id = $result->CheckoutRequestID;
 
             // save the transaction to database
             $donation = new Donation();
@@ -67,7 +67,7 @@ class MpesaController extends Controller
         // Error occurred while submitting STK push
         catch(\Exception $e){
             session()->flash('error', $e->getMessage());
-            return redirect()->back()->withInput(request()->all());
+            return redirect()->back()->withInput();
         } 
     }
 

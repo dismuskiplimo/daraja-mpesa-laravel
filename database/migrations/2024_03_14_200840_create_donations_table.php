@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string("donor_note");
             $table->string("merchant_request_id");
             $table->string("checkout_request_id");
-            $table->string("mpesa_tansaction_id");
+            $table->string("mpesa_tansaction_id")->default("");
             $table->boolean("fulfilled")->default('0');
 
             $table->timestamps();

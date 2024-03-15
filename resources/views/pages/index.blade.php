@@ -12,32 +12,32 @@
 
                 <div class = "form-group">
                     <label for="donor-name">Donor Name<span class = "text-red-600">*</span></label>
-                    <input type="text" name = "donor_name" id = "donor-name" placeholder="John Doe" title = "Donor Name" required>
+                    <input type="text" name = "donor_name" id = "donor-name" placeholder="John Doe" title = "Donor Name" value = "{{ old("donor_name") }}" required>
                 </div>
 
                 <div class = "form-group">
                     <label for="phone">Telephone (07XXXXXXXX e.g. 0720123456)<span class = "text-red-600">*</span></label>
-                    <input type="text" name = "phone" id = "phone" placeholder="07XXXXXXXX" pattern="0[0-9]{9}" title = "Phone Number" required>
+                    <input type="text" name = "phone" id = "phone" placeholder="07XXXXXXXX" pattern="0[0-9]{9}" title = "Phone Number" value = "{{ old("phone") }}" required>
                 </div>
 
                 <div class = "form-group">
                     <label for="donation-type">Donation Type<span class = "text-red-600">*</span></label>
                     <select  name = "donation_type" id = "donation-type" title = "Donation Type" required>
-                        <option>Tithe</option>
-                        <option>Offertory</option>
-                        <option>Church Development</option>
-                        <option>Buy Pew</option>
+                        <option {{ old('donation_type') != null && old('donation_type') == 'Tithe' ? 'selected' : "" }}>Tithe</option>
+                        <option {{ old('donation_type') != null && old('donation_type') == 'Offertory' ? 'selected' : "" }}>Offertory</option>
+                        <option {{ old('donation_type') != null && old('donation_type') == 'Church Development' ? 'selected' : "" }}>Church Development</option>
+                        <option {{ old('donation_type') != null && old('donation_type') == 'Buy Pew' ? 'selected' : "" }}>Buy Pew</option>
                     </select>
                 </div>
         
                 <div class = "form-group">
                     <label for="amount">Amount (Min: KES 5)<span class = "text-red-600">*</span></label>
-                    <input type="number" name = "amount" min = "5" id = "amount" placeholder="500" title = "Amount" required>
+                    <input type="number" name = "amount" min = "5" id = "amount" placeholder="500" title = "Amount" value = "{{ old("amount") }}" required>
                 </div>
 
                 <div class = "form-group">
                     <label for="donor-note">Donor Note<span class = "text-red-600">*</span></label>
-                    <textarea  name = "donor_note" id = "donor-note" title = "Donor Note" placeholder="Note" required></textarea>
+                    <textarea  name = "donor_note" id = "donor-note" title = "Donor Note" placeholder="Note" required>{{ old("donor_note") }}</textarea>
                 </div>
         
                 <button class="p-2 bg-gray-800" type="submit">Make Donation</button>
