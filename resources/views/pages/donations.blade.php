@@ -30,7 +30,7 @@ $<x-guest-layout>
                             <td>{{ $donation->amount }}</td>
                             <td>{{ $donation->donor_note }}</td>
                             <td>{{ $donation->mpesa_receipt_number }}</td>
-                            <td>{!! $donation->fulfilled == '1' ? 'YES' : 'NO' !!}</td>
+                            <td>{!! $donation->fulfilled == '1' ? '<span class = "text-green-600">YES</span>' : '<span class = "text-red-600">NO</span>' !!}</td>
                         </tr>
                     @endforeach
                 </tbody>
