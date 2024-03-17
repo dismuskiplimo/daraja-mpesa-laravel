@@ -1,4 +1,4 @@
-$<x-guest-layout>
+<x-guest-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('Donations') }}
@@ -7,8 +7,8 @@ $<x-guest-layout>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <h2>Donations</h2>
-            <table>
+            <h2 class="text-center text-xl font-bold mb-8">Donations</h2>
+            <table class="table-auto border-solid border border-slate-600">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -23,7 +23,7 @@ $<x-guest-layout>
 
                 <tbody>
                     @foreach($donations as $donation)
-                        <tr>
+                        <tr class="odd:bg-slate-200 even:bg-slate-100">
                             <td>{{ $donation->donor_name }}</td>
                             <td>{{ $donation->phone }}</td>
                             <td>{{ $donation->donation_type }}</td>
