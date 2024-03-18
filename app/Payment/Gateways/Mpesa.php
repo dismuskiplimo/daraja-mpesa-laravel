@@ -49,13 +49,13 @@
         // MPESA URLs
         // LIVE
         protected const SANDBOX_AUTHORIZATION_URL = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        protected const SANDBOX_REQUEST_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
-        protected const SANDBOX_QUERY_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query";
+        protected const SANDBOX_STKPUSH_REQUEST_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+        protected const SANDBOX_STKPUSH_QUERY_URL = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query";
 
         // SANDBOX
         protected const LIVE_AUTHORIZATION_URL = "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-        protected const LIVE_REQUEST_URL = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
-        protected const LIVE_QUERY_URL = "https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query";
+        protected const LIVE_STKPUSH_REQUEST_URL = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+        protected const LIVE_STKPUSH_QUERY_URL = "https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query";
         
         // MPESA Credentials
         protected $shortcode;
@@ -65,8 +65,8 @@
 
         // MPESA URLs
         protected $authorization_url;
-        protected $request_url;
-        protected $query_url;
+        protected $stkpush_request_url;
+        protected $stkpush_query_url;
 
         // MPESA transaction type
         protected $transaction_type;
@@ -93,6 +93,42 @@
 
             // set API urls based on environment
             $this->set_api_urls($environment);
+        }
+
+        /**
+         * Get the Shortcode
+         * 
+         * Return: Shortcode
+         */
+        public function get_shortcode(){
+            return $this->shortcode;
+        }
+
+        /**
+         * Get the Authorization URL
+         * 
+         * Return: Authorization URL
+         */
+        public function get_authorization_url(){
+            return $this->authorization_url;
+        }
+
+        /**
+         * Get the STK Push Query URL
+         * 
+         * Return: STK Push Query URL
+         */
+        public function get_stkpush_query_url(){
+            return $this->stkpush_query_url;
+        }
+
+        /**
+         * Get the STK Push Request URL
+         * 
+         * Return: the STK Push Request URL
+         */
+        public function get_stkpush_request_url(){
+            return $this->stkpush_request_url;
         }
 
         /**
@@ -169,7 +205,7 @@
             $curl = curl_init();
 
             // set the URL
-            curl_setopt($curl, CURLOPT_URL, $this->request_url);
+            curl_setopt($curl, CURLOPT_URL, $this->stkpush_request_url);
 
             // Enable the header
             curl_setopt($curl, CURLOPT_HEADER, true);
@@ -258,7 +294,7 @@
             $curl = curl_init();
 
             // set the URL
-            curl_setopt($curl, CURLOPT_URL, $this->query_url);
+            curl_setopt($curl, CURLOPT_URL, $this->stkpush_query_url);
 
             // Enable the header
             curl_setopt($curl, CURLOPT_HEADER, true);
@@ -392,14 +428,14 @@
          protected function set_api_urls($envionment){
             if($envionment == 'live'){
                 $this->authorization_url = $this::LIVE_AUTHORIZATION_URL;
-                $this->request_url = $this::LIVE_REQUEST_URL;
-                $this->query_url = $this::LIVE_QUERY_URL;
+                $this->stkpush_request_url = $this::LIVE_STKPUSH_REQUEST_URL;
+                $this->stkpush_query_url = $this::LIVE_STKPUSH_QUERY_URL;
             }
 
             else{
                 $this->authorization_url = $this::SANDBOX_AUTHORIZATION_URL;
-                $this->request_url = $this::SANDBOX_REQUEST_URL;
-                $this->query_url = $this::SANDBOX_QUERY_URL;
+                $this->stkpush_request_url = $this::SANDBOX_STKPUSH_REQUEST_URL;
+                $this->stkpush_query_url = $this::SANDBOX_STKPUSH_QUERY_URL;
             }
          }
 
@@ -416,6 +452,4 @@
                 $this->transaction_type = 'CustomerBuyGoodsOnline';
             }
          }
-
-
     }
