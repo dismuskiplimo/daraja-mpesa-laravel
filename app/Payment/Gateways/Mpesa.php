@@ -175,7 +175,7 @@
         }
 
         /**
-         * Performs STK push on customers Phone
+         * Requests STK push on customers Phone
          * 
          * Param 1. phone - Phone number to receive STK Push
          * Param 2. amount - The amount to request (only whole numbers)
@@ -440,16 +440,22 @@
          }
 
          /**
-          * Set the transaction type based on constructor parameter
+          * Set the transaction type. Only two values accepted ("paybill" or "till")
+          * 
+          * Throws: Exception if invalid transacion type is provided
           */
 
-         protected function set_transaction_type($transaction_type){
+         public function set_transaction_type($transaction_type){
             if($transaction_type == 'paybill'){
                 $this->transaction_type = 'CustomerPayBillOnline';
             }
 
-            else{
+            else if($transaction_type == 'till'){
                 $this->transaction_type = 'CustomerBuyGoodsOnline';
+            }
+
+            else{
+                throw new \Exception('Invalid Transaction Type');
             }
          }
     }
