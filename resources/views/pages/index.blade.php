@@ -40,7 +40,10 @@
                     <textarea  name = "donor_note" id = "donor-note" title = "Donor Note" placeholder="Note" required>{{ old("donor_note") }}</textarea>
                 </div>
         
-                <button class="p-3 bg-gray-800 text-white" type="submit">Make Donation</button>
+                <div class="flex justify-end">
+                    <button class="p-3 border-2 border-slate-600 hover:border-slate-800 text-slate" type="submit">Make Donation</button>
+                </div>
+                
             </form>
         </div>
     </div>
