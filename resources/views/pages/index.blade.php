@@ -7,6 +7,10 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <p class="text-slate-600 mb-5">
+                "Lets join hands to better our community"
+            </p>
+            
             <form action="" method = "POST">
                 @csrf
 
