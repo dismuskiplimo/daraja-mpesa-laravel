@@ -1,5 +1,7 @@
 # MPESA Payments Using Laravel 11 and Safaricom Daraja API 2.0
 
+![Screenshot](./screenshot.png)
+
 ## Prerequisites
 1. PHP 8.2 or above
 2. MySQL Server/Maria DB, PostgreSQL, or DBMS of your choice
@@ -44,5 +46,5 @@
 
 ## Credits
 1. Laravel by Taylor Otwell [Visit Laravel Website](https://laravel.com/)
-2. MPESA Daraja API 2.0 vy Safaricom [Visit Safaricom Daraja API 2.0 Website](https://developer.safaricom.co.ke/)
+2. MPESA Daraja API 2.0 by Safaricom [Visit Safaricom Daraja API 2.0 Website](https://developer.safaricom.co.ke/)
 3. Tailwind CSS by Adam Wathan [Visit Tailwind CSS Website](https://tailwindcss.com/)
