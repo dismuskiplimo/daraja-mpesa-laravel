@@ -45,7 +45,7 @@
                     <textarea  name = "donor_note" id = "donor-note" title = "Donor Note" placeholder="Note" required>{{ old("donor_note") }}</textarea>
                 </div>
         
-                <button class="p-3 bg-gray-800 text-white text-center" type="submit">Make Donation Via<br><img src = "{{ asset("img/mpesa-logo.svg") }}" style = "height: 70px"></button>
+                <button class="p-3 bg-gray-800 text-white text-center" style = "display: flex; align-items: center; gap: 20px" type="submit">Make Donation Via <img src = "{{ asset("img/mpesa-logo.svg") }}" style = "height: 70px"></button>
             </form>
         </div>
     </div>
