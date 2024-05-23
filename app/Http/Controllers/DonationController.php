@@ -11,20 +11,11 @@ class DonationController extends Controller
      * Return all the donations
      */
 
-    public function index(Request $request){
+     public function index(Request $request){
         $donations = Donation::orderBy("created_at", 'DESC')->paginate(50);
 
         return view("pages.donations", [
             "donations" => $donations,
         ]);
-    }
-
-    /**
-     * Return thank you page
-     */
-
-     public function thank_you(Request $request){
-        return view("pages.thank-you", []);
-    }
+     }
 }
-

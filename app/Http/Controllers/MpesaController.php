@@ -48,7 +48,7 @@ class MpesaController extends Controller
         ]);
 
         $callback_url = route("mpesa_callback");
-        $account_reference = "DONATION";
+        $account_reference = "donation";
         $transaction_description = "Donation ACC";
 
         // attempt STK push
@@ -75,9 +75,7 @@ class MpesaController extends Controller
 
             // Save flash message to session
             session()->flash('success', "STK Push sent to phone. Please Input MPESA PIN and click OK");
-            
-            // redirect to the thank you page
-            return redirect()->route("thank_you");
+            return view("pages.mpesa-response", []);
         }
 
         // Error occurred while submitting STK push

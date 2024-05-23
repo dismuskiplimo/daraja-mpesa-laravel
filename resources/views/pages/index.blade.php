@@ -7,9 +7,10 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <p class="text-slate-600 mb-5">
-                "Lets join hands to better our community"
-            </p>
+            <div class = "text-center">
+                <h1 style = "font-size: 2rem; font-weight: bold; margin-bottom: 30px">Make a Donation Via M-PESA</h1>
+                <p style = "margin-bottom: 40px;"><i>Giving is not just about making a donation, it's about making a difference. <br> Your generosity can light up lives and bring hope to those in need.</i></p>
+            </div>
             
             <form action="" method = "POST">
                 @csrf
@@ -44,10 +45,7 @@
                     <textarea  name = "donor_note" id = "donor-note" title = "Donor Note" placeholder="Note" required>{{ old("donor_note") }}</textarea>
                 </div>
         
-                <div class="flex justify-end">
-                    <button class="p-3 border-2 border-slate-600 hover:border-slate-800 text-slate" type="submit">Make Donation</button>
-                </div>
-                
+                <button class="p-3 bg-gray-800 text-white text-center" type="submit">Make Donation Via<br><img src = "{{ asset("img/mpesa-logo.svg") }}" style = "height: 70px"></button>
             </form>
         </div>
     </div>
