@@ -97,7 +97,7 @@ class MpesaController extends Controller
         // attempt to parse the equest
         try{
             // parse body
-            $body = $this->mpesa->process_callback($request);
+            $body = $this->mpesa->process_callback($request, false);
             
             // Create MPESA Log
             $log = new MpesaCallbackLog();
